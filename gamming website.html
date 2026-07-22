@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS | Next-Gen Gaming Center & 3D Showroom</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js and OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #050508;
+            --card-bg: rgba(18, 18, 26, 0.7);
+            --neon-blue: #00f0ff;
+            --neon-red: #ff0055;
+            --text-main: #f0f0f5;
+            --text-muted: #a0a0b0;
+            --font-heading: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 18px;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-blue);
+            border-radius: 4px;
+        }
+
+        /* Typography Helper Classes */
+        h1, h2, h3, .brand-text {
+            font-family: var(--font-heading);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .glow-text-blue {
+            color: var(--neon-blue);
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+        }
+
+        .glow-text-red {
+            color: var(--neon-red);
+            text-shadow: 0 0 12px rgba(255, 0, 85, 0.6);
+        }
+
+        /* Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(5, 5, 8, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.2rem 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-family: var(--font-heading);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--neon-blue);
+        }
+
+        /* Hero Section */
+        #home {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 8%;
+            background: radial-gradient(circle at 20% 50%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 50%, rgba(255, 0, 85, 0.15) 0%, transparent 50%);
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 650px;
+            z-index: 2;
+        }
+
+        .hero-tag {
+            font-family: var(--font-heading);
+            color: var(--neon-blue);
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+            display: inline-block;
+            border: 1px solid var(--neon-blue);
+            padding: 4px 12px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .hero-title {
+            font-size: 3.8rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            font-weight: 900;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+        }
+
+        /* Glowing Buttons */
+        .btn {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            padding: 1rem 2.5rem;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--neon-blue), #0088ff);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #fff;
+            border: 1px solid var(--neon-red);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
+            margin-left: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--neon-red);
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.7);
+            transform: translateY(-2px);
+        }
+
+        /* Features Section */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 5rem 8%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 2.5rem 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-red));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--neon-blue);
+        }
+
+        /* 3D Showroom Section */
+        #showroom {
+            padding: 6rem 8% 4rem;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .showroom-container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2rem;
+            background: #08080d;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Vehicle Selector Sidebar */
+        .vehicle-menu {
+            background: rgba(12, 12, 18, 0.9);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .vehicle-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-main);
+            text-align: left;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .vehicle-btn.active-blue {
+            border-color: var(--neon-blue);
+            background: rgba(0, 240, 255, 0.08);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+
+        .vehicle-btn.active-red {
+            border-color: var(--neon-red);
+            background: rgba(255, 0, 85, 0.08);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
+        }
+
+        .vehicle-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .vehicle-info span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* 3D Canvas Viewport */
+        .canvas-wrapper {
+            position: relative;
+            height: 550px;
+            width: 100%;
+            background: #000;
+        }
+
+        #webgl-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .controls-hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            pointer-events: none;
+            display: flex;
+            gap: 15px;
+        }
+
+        .specs-panel {
+            grid-column: 1 / -1;
+            background: rgba(12, 12, 18, 0.95);
+            padding: 1.5rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .spec-item {
+            text-align: center;
+        }
+
+        .spec-item div {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .spec-item strong {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            color: #fff;
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 992px) {
+            .showroom-container {
+                grid-template-columns: 1fr;
+            }
+            .canvas-wrapper {
+                height: 400px;
+            }
+            .hero-title {
+                font-size: 2.8rem;
+            }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 8%;
+            background: #020204;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <header>
+        <a href="#home" class="logo">
+            <i class="fa-solid fa-gamepad glow-text-blue"></i>
+            NEXUS<span class="glow-text-red">HQ</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#showroom">3D Showroom</a></li>
+            <li><a href="#about">About</a></li>
+        </ul>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Home / Hero Section -->
+        <section id="home">
+            <div class="hero-content">
+                <span class="hero-tag">ULTIMATE GAMING ARENA</span>
+                <h1 class="hero-title">PLAY. COMPETE. <br><span class="glow-text-blue">CONNECT.</span> <span class="glow-text-red">LEVEL UP!</span></h1>
+                <p class="hero-description">Step into the most advanced gaming lounge. Armed with ultra high-performance rigs, next-gen consoles, esports tournaments, and a premium 360° interactive supercar & bike display.</p>
+                <div>
+                    <a href="#showroom" class="btn btn-primary"><i class="fa-solid fa-play"></i> Explore Showroom</a>
+                    <a href="#about" class="btn btn-secondary"><i class="fa-solid fa-users"></i> Join Community</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Features -->
+        <section class="features-grid">
+            <div class="feature-card">
+                <i class="fa-solid fa-desktop feature-icon"></i>
+                <h3>RTX 4090 Rigs</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">240Hz OLED Monitors, mechanical gear, and ultra-low latency fiber internet.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-trophy feature-icon" style="color: var(--neon-red);"></i>
+                <h3>Weekly Tournaments</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">Compete in Valorant, CS2, Rocket League, and FIFA for cash prizes.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-vr-cardboard feature-icon"></i>
+                <h3>VR & 3D Lounge</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">Experience futuristic interactive displays and full-motion VR simulators.</p>
+            </div>
+        </section>
+
+        <!-- 3D Vehicle Showcase Section -->
+        <section id="showroom">
+            <div class="section-header">
+                <span style="color: var(--neon-red); font-family: var(--font-heading); font-size: 0.85rem; letter-spacing: 2px;">INTERACTIVE EXPERIENCE</span>
+                <h2><span class="glow-text-blue">360° SUPERCAR & BIKE</span> SHOWROOM</h2>
+                <p>Inspect custom futuristic high-performance vehicles in full 3D interactive WebGL</p>
+            </div>
+
+            <div class="showroom-container">
+                <!-- Vehicle Selector -->
+                <div class="vehicle-menu">
+                    <button class="vehicle-btn active-blue" onclick="switchVehicle('lamborghini', this, 'blue')">
+                        <div class="vehicle-info">
+                            <h4>Blue Lamborghini</h4>
+                            <span>Stylized Supercar Concept</span>
+                        </div>
+                        <i class="fa-solid fa-car" style="color: var(--neon-blue);"></i>
+                    </button>
+
+                    <button class="vehicle-btn" onclick="switchVehicle('ferrari', this, 'red')">
+                        <div class="vehicle-info">
+                            <h4>Red Ferrari 360</h4>
+                            <span>Custom Sport Edition</span>
+                        </div>
+                        <i class="fa-solid fa-car-side" style="color: var(--neon-red);"></i>
+                    </button>
+
+                    <button class="vehicle-btn" onclick="switchVehicle('kawasaki', this, 'blue')">
+                        <div class="vehicle-info">
+                            <h4>Blue Ninja H2</h4>
+                            <span>Superbike Concept</span>
+                        </div>
+                        <i class="fa-solid fa-motorcycle" style="color: var(--neon-blue);"></i>
+                    </button>
+
+                    <button class="vehicle-btn" onclick="switchVehicle('bmw', this, 'red')">
+                        <div class="vehicle-info">
+                            <h4>Red BMW S1000RR</h4>
+                            <span>Racing Edition Superbike</span>
+                        </div>
+                        <i class="fa-solid fa-motorcycle" style="color: var(--neon-red);"></i>
+                    </button>
+                </div>
+
+                <!-- WebGL 3D Viewport -->
+                <div class="canvas-wrapper">
+                    <canvas id="webgl-canvas"></canvas>
+                    <div class="controls-hint">
+                        <span><i class="fa-solid fa-mouse-pointer"></i> Drag to Rotate</span>
+                        <span><i class="fa-solid fa-arrows-up-down"></i> Scroll to Zoom</span>
+                    </div>
+                </div>
+
+                <!-- Dynamic Specs Panel -->
+                <div class="specs-panel">
+                    <div class="spec-item">
+                        <div>Vehicle Style</div>
+                        <strong id="spec-name">Blue Lamborghini Concept</strong>
+                    </div>
+                    <div class="spec-item">
+                        <div>Lighting Effect</div>
+                        <strong id="spec-lighting" style="color: var(--neon-blue);">Metallic Blue Neon</strong>
+                    </div>
+                    <div class="spec-item">
+                        <div>Display Platform</div>
+                        <strong>360° Auto-Rotating Pedestal</strong>
+                    </div>
+                    <div class="spec-item">
+                        <div>Rendering Engine</div>
+                        <strong style="color: var(--neon-blue);">Three.js WebGL</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 NEXUS Gaming Center. Designed for Gamers. All rights reserved.</p>
+        <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #666;">
+            Disclaimer: Vehicle models are stylized 3D representations designed for interactive display. Trademarks belong to their respective owners.
+        </p>
+    </footer>
+
+    <!-- Three.js 3D Showroom Script -->
+    <script>
+        // --- 1. SETUP THREE.JS SCENE, CAMERA & RENDERER ---
+        const container = document.querySelector('.canvas-wrapper');
+        const canvas = document.getElementById('webgl-canvas');
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050508);
+        scene.fog = new THREE.FogExp2(0x050508, 0.03);
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(5, 3, 7);
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        // OrbitControls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxPolarAngle = Math.PI / 2 + 0.05; // Don't go below ground
+        controls.minDistance = 3;
+        controls.maxDistance = 12;
+
+        // --- 2. LIGHTING & ENVIRONMENT ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(ambientLight);
+
+        // Neon Blue Spotlight
+        const blueLight = new THREE.SpotLight(0x00f0ff, 2);
+        blueLight.position.set(-5, 6, 3);
+        blueLight.castShadow = true;
+        scene.add(blueLight);
+
+        // Neon Red Spotlight
+        const redLight = new THREE.SpotLight(0xff0055, 2);
+        redLight.position.set(5, 6, -3);
+        redLight.castShadow = true;
+        scene.add(redLight);
+
+        // Center Overhead Light
+        const topLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        topLight.position.set(0, 10, 0);
+        scene.add(topLight);
+
+        // --- 3. SHOWROOM FLOOR & PEDESTAL ---
+        // Metallic Floor Grid
+        const floorGeo = new THREE.PlaneGeometry(30, 30);
+        const floorMat = new THREE.MeshStandardMaterial({ 
+            color: 0x0a0a10, 
+            roughness: 0.2, 
+            metalness: 0.8 
+        });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        const grid = new THREE.GridHelper(30, 30, 0x00f0ff, 0x222233);
+        grid.position.y = 0.01;
+        scene.add(grid);
+
+        // Rotating Pedestal
+        const pedestalGroup = new THREE.Group();
+        const pedestalGeo = new THREE.CylinderGeometry(2.8, 3, 0.3, 32);
+        const pedestalMat = new THREE.MeshStandardMaterial({ color: 0x12121c, roughness: 0.5, metalness: 0.9 });
+        const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
+        pedestal.position.y = 0.15;
+        pedestal.receiveShadow = true;
+        pedestal.castShadow = true;
+        pedestalGroup.add(pedestal);
+
+        // Pedestal Neon Ring
+        const ringGeo = new THREE.RingGeometry(2.81, 2.9, 32);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = 0.31;
+        pedestalGroup.add(ring);
+
+        scene.add(pedestalGroup);
+
+        // Floating Particles
+        const particleGeo = new THREE.BufferGeometry();
+        const particleCount = 150;
+        const posArray = new Float32Array(particleCount * 3);
+        for(let i=0; i<particleCount*3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 15;
+        }
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particleMat = new THREE.PointsMaterial({ size: 0.04, color: 0x00f0ff, transparent: true, opacity: 0.6 });
+        const particles = new THREE.Points(particleGeo, particleMat);
+        scene.add(particles);
+
+        // --- 4. PROCEDURAL STYLIZED 3D VEHICLE CREATION ---
+        const vehicleGroup = new THREE.Group();
+        vehicleGroup.position.y = 0.31;
+        scene.add(vehicleGroup);
+
+        // Helper Materials
+        const bluePaint = new THREE.MeshStandardMaterial({ color: 0x0066ff, roughness: 0.1, metalness: 0.9 });
+        const redPaint = new THREE.MeshStandardMaterial({ color: 0xcc0022, roughness: 0.1, metalness: 0.9 });
+        const glassMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.0, metalness: 1.0, transparent: true, opacity: 0.7 });
+        const tireMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
+        const neonBlueMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+        const neonRedMat = new THREE.MeshBasicMaterial({ color: 0xff0055 });
+
+        // Builder: Stylized Car (Lamborghini / Ferrari inspired)
+        function createCarMesh(paintMat, neonMat) {
+            const car = new THREE.Group();
+            
+            // Body Base
+            const bodyGeo = new THREE.BoxGeometry(1.8, 0.5, 3.6);
+            const body = new THREE.Mesh(bodyGeo, paintMat);
+            body.position.y = 0.5;
+            body.castShadow = true;
+            car.add(body);
+
+            // Cabin / Windshield
+            const cabinGeo = new THREE.BoxGeometry(1.4, 0.45, 1.8);
+            const cabin = new THREE.Mesh(cabinGeo, glassMat);
+            cabin.position.set(0, 0.85, -0.2);
+            car.add(cabin);
+
+            // Headlights / Accent Strip
+            const lightGeo = new THREE.BoxGeometry(1.6, 0.05, 0.1);
+            const lights = new THREE.Mesh(lightGeo, neonMat);
+            lights.position.set(0, 0.5, 1.81);
+            car.add(lights);
+
+            // Wheels
+            const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.25, 24);
+            wheelGeo.rotateZ(Math.PI / 2);
+            
+            const positions = [
+                [-0.95, 0.35, 1.1],  // Front Left
+                [0.95, 0.35, 1.1],   // Front Right
+                [-0.95, 0.35, -1.1], // Rear Left
+                [0.95, 0.35, -1.1]   // Rear Right
+            ];
+
+            positions.forEach(pos => {
+                const wheel = new THREE.Mesh(wheelGeo, tireMat);
+                wheel.position.set(...pos);
+                wheel.castShadow = true;
+                car.add(wheel);
+            });
+
+            return car;
+        }
+
+        // Builder: Stylized Bike (Ninja H2 / BMW S1000RR inspired)
+        function createBikeMesh(paintMat, neonMat) {
+            const bike = new THREE.Group();
+
+            // Frame / Main Tank
+            const tankGeo = new THREE.BoxGeometry(0.6, 0.5, 1.4);
+            const tank = new THREE.Mesh(tankGeo, paintMat);
+            tank.position.y = 0.75;
+            tank.castShadow = true;
+            bike.add(tank);
+
+            // Fairing Front
+            const frontGeo = new THREE.ConeGeometry(0.4, 0.8, 4);
+            frontGeo.rotateX(-Math.PI / 2);
+            const front = new THREE.Mesh(frontGeo, paintMat);
+            front.position.set(0, 0.75, 0.8);
+            bike.add(front);
+
+            // Neon Headlight
+            const lightGeo = new THREE.SphereGeometry(0.12, 16, 16);
+            const light = new THREE.Mesh(lightGeo, neonMat);
+            light.position.set(0, 0.75, 1.2);
+            bike.add(light);
+
+            // Wheels
+            const wheelGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.2, 24);
+            wheelGeo.rotateZ(Math.PI / 2);
+
+            const frontWheel = new THREE.Mesh(wheelGeo, tireMat);
+            frontWheel.position.set(0, 0.45, 1.1);
+            frontWheel.castShadow = true;
+            bike.add(frontWheel);
+
+            const rearWheel = new THREE.Mesh(wheelGeo, tireMat);
+            rearWheel.position.set(0, 0.45, -1.0);
+            rearWheel.castShadow = true;
+            bike.add(rearWheel);
+
+            return bike;
+        }
+
+        // Pre-build Vehicle Models
+        const models = {
+            lamborghini: createCarMesh(bluePaint, neonBlueMat),
+            ferrari: createCarMesh(redPaint, neonRedMat),
+            kawasaki: createBikeMesh(bluePaint, neonBlueMat),
+            bmw: createBikeMesh(redPaint, neonRedMat)
+        };
+
+        // Display initial model
+        let currentModel = models.lamborghini;
+        vehicleGroup.add(currentModel);
+
+        // --- 5. VEHICLE SWITCHING LOGIC ---
+        const specName = document.getElementById('spec-name');
+        const specLighting = document.getElementById('spec-lighting');
+
+        const vehicleDetails = {
+            lamborghini: { name: 'Blue Lamborghini Concept', accent: 'Metallic Blue Neon', color: '#00f0ff' },
+            ferrari: { name: 'Red Ferrari 360 Custom', accent: 'Gloss Red LED', color: '#ff0055' },
+            kawasaki: { name: 'Blue Ninja H2 Superbike', accent: 'Cyan Carbon Highlights', color: '#00f0ff' },
+            bmw: { name: 'Red BMW S1000RR Edition', accent: 'Crimson Racing Glow', color: '#ff0055' }
+        };
+
+        function switchVehicle(key, btnElement, themeColor) {
+            // Update Menu UI Buttons
+            document.querySelectorAll('.vehicle-btn').forEach(btn => {
+                btn.classList.remove('active-blue', 'active-red');
+            });
+            btnElement.classList.add(themeColor === 'blue' ? 'active-blue' : 'active-red');
+
+            // Swap 3D Model
+            vehicleGroup.remove(currentModel);
+            currentModel = models[key];
+            vehicleGroup.add(currentModel);
+
+            // Reset Animation Scale Bump
+            vehicleGroup.scale.set(0.8, 0.8, 0.8);
+
+            // Update Pedestal Glow & Specs
+            ringMat.color.setHex(themeColor === 'blue' ? 0x00f0ff : 0xff0055);
+            particleMat.color.setHex(themeColor === 'blue' ? 0x00f0ff : 0xff0055);
+            
+            const info = vehicleDetails[key];
+            specName.textContent = info.name;
+            specLighting.textContent = info.accent;
+            specLighting.style.color = info.color;
+        }
+
+        // --- 6. ANIMATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Smooth scale transition on model switch
+            if (vehicleGroup.scale.x < 1) {
+                vehicleGroup.scale.x += 0.02;
+                vehicleGroup.scale.y += 0.02;
+                vehicleGroup.scale.z += 0.02;
+            }
+
+            // Auto-rotate display platform
+            pedestalGroup.rotation.y += 0.005;
+            vehicleGroup.rotation.y += 0.005;
+
+            // Slowly drift particles
+            particles.rotation.y += 0.0005;
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // --- 7. RESPONSIVE CANVAS RESIZING ---
+        window.addEventListener('resize', () => {
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        });
+    </script>
+</body>
+</html>
